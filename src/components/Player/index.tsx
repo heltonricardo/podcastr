@@ -1,21 +1,31 @@
-import { useContext, useRef, useEffect } from "react";
-import { PlayerContext } from "../../contexts/PlayerContext";
+import { useRef, useEffect, useState } from "react";
+import { usePlayer } from "../../contexts/PlayerContext";
 import styles from "./styles.module.scss";
 import Image from "next/image";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
+import { convertDurationToTimeString } from "../../utils/convertDurationToTimeString";
 
 export function Player() {
   // Anotação 01
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [progress, setProgress] = useState(0);
 
   const {
     episodeList,
     currentEpisodeIndex,
     isPlaying,
+    isLooping,
+    isShuffling,
     togglePlay,
+    toggleLoop,
+    toggleShuffle,
     setPlayingState,
-  } = useContext(PlayerContext);
+    playNext,
+    playPrevious,
+    hasPrevious,
+    hasNext,
+  } = usePlayer();
 
   // Anotação 02
   useEffect(() => {
@@ -29,6 +39,14 @@ export function Player() {
       audioRef.current.pause();
     }
   }, [isPlaying]);
+
+  function setupProgressListener() {
+    audioRef.current.currentTime = 0;
+
+    audioRef.current.addEventListener("timeupdate", () => {
+      setProgress(Math.floor(audioRef.current.currentTime));
+    });
+  }
 
   const episode = episodeList[currentEpisodeIndex];
 
@@ -58,10 +76,12 @@ export function Player() {
 
       <footer className={!episode ? styles.empty : ""}>
         <div className={styles.progress}>
-          <span>00:00</span>
+          <span>{convertDurationToTimeString(progress)}</span>
           <div className={styles.slider}>
             {episode ? (
               <Slider
+                max={episode.duration}
+                value={progress}
                 trackStyle={{ backgroundColor: "#04d361" }}
                 railStyle={{ backgroundColor: "#9f75ff" }}
                 handleStyle={{ borderColor: "#04d361", borderWidth: 4 }}
@@ -70,27 +90,42 @@ export function Player() {
               <div className={styles.emptySlider} />
             )}
           </div>
-          <span>00:00</span>
+          {/* Anotação 03 */}
+          <span>{convertDurationToTimeString(episode?.duration ?? 0)}</span>
         </div>
 
-        {/* Anotação 03 */}
+        {/* Anotação 04 */}
         {episode && (
           <audio
             src={episode.url}
             ref={audioRef}
+            autoPlay
+            loop={isLooping}
+            onLoadedMetadata={setupProgressListener}
+            // Anotação 05
             onPlay={() => setPlayingState(true)}
             onPause={() => setPlayingState(false)}
-            autoPlay
           />
         )}
 
         <div className={styles.buttons}>
-          <button type="button" disabled={!episode}>
+          <button
+            type="button"
+            onClick={toggleShuffle}
+            className={isShuffling ? styles.isActive : ""}
+            disabled={!episode || episodeList.length == 1}
+          >
             <img src="/shuffle.svg" alt="Modo aleatório" />
           </button>
-          <button type="button" disabled={!episode}>
+
+          <button
+            type="button"
+            onClick={playPrevious}
+            disabled={!episode || !hasPrevious}
+          >
             <img src="/play-previous.svg" alt="Anterior" />
           </button>
+
           <button
             type="button"
             className={styles.playButton}
@@ -103,10 +138,21 @@ export function Player() {
               <img src="/play.svg" alt="Tocar" />
             )}
           </button>
-          <button type="button" disabled={!episode}>
+
+          <button
+            type="button"
+            onClick={playNext}
+            disabled={!episode || !hasNext}
+          >
             <img src="/play-next.svg" alt="Próxima" />
           </button>
-          <button type="button" disabled={!episode}>
+
+          <button
+            type="button"
+            onClick={toggleLoop}
+            className={isLooping ? styles.isActive : ""}
+            disabled={!episode}
+          >
             <img src="/repeat.svg" alt="Repetir" />
           </button>
         </div>
@@ -125,8 +171,20 @@ export function Player() {
  * arrow function quando há alteração em algum dos valores das variáveis dentro
  * dos colchetes, no exemplo em "isPlaying".
  *
- *Anotação 03
+ * Anotação 03
+ * O operador "?" é útil, nesse caso, quando não sabemos se o objeto é nulo.
+ * Caso "episode" seja nulo, não será feita uma tentativa de acessar o campo
+ * "duration" pois foi usada a notação episode?.duration. O outro operador (??)
+ * foi útil para que, se o objeto é nulo, passamos entao o valor após ele, no
+ * caso o número zero.
+ *
+ * Anotação 04
  * Além do operador ternário comum: "() ? :", é possível usá-lo apenas para
  * quando há uma expressão verdadeira: "() &&" ou para quando há uma expressão
  * falsa: "() ||"
+ *
+ * Anotação 05
+ * onPlay e onPause da tag audio estão relacionados com os botões de atalho
+ * multimídia em alguns teclados de computadores ou de notebooks. Essa
+ * integração é feita pelo próprio browser.
  */
