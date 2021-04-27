@@ -16,6 +16,9 @@ export function Header() {
       </Link>
 
       <p>O melhor para você ouvir, sempre</p>
+      <p>
+        Por <a target="_blank" href="https://github.com/heltonricardo">Helton Ricardo</a>
+      </p>
 
       <span>{currentDate}</span>
     </header>
