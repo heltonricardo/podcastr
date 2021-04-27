@@ -1,8 +1,8 @@
-import axios from 'axios';
+import axios from "axios";
 
 export const api = axios.create({
-   baseURL: 'http://localhost:3333/'
-})
+  baseURL: "http://localhost:3333/",
+});
 
 /* O axios é uma biblioteca para fazer requisições HTTP que trás funcionalidades
  * que não encontramos no fetch(). Por exemplo definir uma URL base, cuja qual

@@ -5,6 +5,7 @@ import { usePlayer } from "../../contexts/PlayerContext";
 import { convertDurationToTimeString } from "../../utils/convertDurationToTimeString";
 import Link from "next/link";
 import Image from "next/image";
+import Head from "next/head";
 import ptBR from "date-fns/locale/pt-BR";
 import styles from "./episode.module.scss";
 
@@ -25,10 +26,14 @@ type EpisodeProps = {
 };
 
 export default function Episode({ episode }: EpisodeProps) {
-const { play } = usePlayer();
+  const { play } = usePlayer();
 
   return (
     <div className={styles.episodeContainer}>
+      <Head>
+        <title>{episode.title} | Podcastr</title>
+      </Head>
+
       <div className={styles.episode}>
         <div className={styles.thumbnailContainer}>
           <Link href="/">

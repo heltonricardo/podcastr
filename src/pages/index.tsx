@@ -58,6 +58,7 @@
  */
 
 import Link from "next/link";
+import Head from "next/head";
 import Image from "next/image";
 import styles from "./home.module.scss";
 import ptBR from "date-fns/locale/pt-BR";
@@ -91,6 +92,11 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
 
   return (
     <div className={styles.homepage}>
+      {/* Anotação 02 */}
+      <Head>
+        <title>Home | Podcastr</title>
+      </Head>
+
       <section className={styles.latestEpisodes}>
         <h2>Últimos lançamentos</h2>
         <ul>
@@ -156,7 +162,6 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
                     />
                   </td>
                   <td>
-                    {/* Anotação 04*/}
                     <Link href={`/episodes/${episode.id}`}>
                       <a>{episode.title}</a>
                     </Link>
@@ -183,6 +188,7 @@ export default function Home({ latestEpisodes, allEpisodes }: HomeProps) {
     </div>
   );
 }
+
 export const getStaticProps: GetStaticProps = async () => {
   // localhost:3333/episodes com os parâmetros listados:
   const { data } = await api.get("episodes", {
@@ -193,7 +199,7 @@ export const getStaticProps: GetStaticProps = async () => {
     },
   });
 
-  // Anotação 02
+  // Anotação 05
   const episodes = data.map((episode) => {
     return {
       id: episode.id,
@@ -232,10 +238,8 @@ export const getStaticProps: GetStaticProps = async () => {
  * manutenção e entendimento dos códigos.
  *
  * Anotação 02
- * Formatando os dados (nesse caso a data do podcast) em getStaticProps, logo
- * após o recebimento desses dados, e antes de passar para o componente Home(),
- * impedimos que esse código seja executado todas as vezes que o componente é
- * renderizado na tela novamente, através da mudança de estado.
+ * O componente Head permite que tudo o que está dentro dele, seja injetado no
+ * cabeçalho do HTML.
  *
  * Anotação 03
  * O componente Image do next nos ajuda na questão da otimização. Basta
@@ -251,4 +255,10 @@ export const getStaticProps: GetStaticProps = async () => {
  * O Link serve para que, quando há uma navegação na tela, não seja preciso
  * recarregar toda a aplicação. Para isso basta envolver a tag âncora (<a></a>)
  * com a tag Link contendo o href que estaria na âncora.
+ *
+ * Anotação 05
+ * Formatando os dados (nesse caso a data do podcast) em getStaticProps, logo
+ * após o recebimento desses dados, e antes de passar para o componente Home(),
+ * impedimos que esse código seja executado todas as vezes que o componente é
+ * renderizado na tela novamente, através da mudança de estado.
  */
